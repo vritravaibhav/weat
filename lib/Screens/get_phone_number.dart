@@ -37,7 +37,7 @@ class _GetPhoneNumberState extends State<GetPhoneNumber> {
   }
 
   var response;
-  Future<void> regis() async {
+  Future<bool> regis(BuildContext context) async {
     // FormData formData = new FormData.fromMap(
     //     {"tel_code": widget.code, "phone": _phoneNumber.text});
     // response = await Dio().post(
@@ -50,13 +50,17 @@ class _GetPhoneNumberState extends State<GetPhoneNumber> {
     print(widget.code);
     print(widget.user);
     print(_phoneNumber.text);
+    // print(widget.user);
+    String id = "counsellor";
+    if (widget.user == "Student") id = "student";
+    print(id);
     response = await http.post(
-      Uri.parse("https://studylancer.yuktidea.com/api/resend-otp"),
+      Uri.parse("https://studylancer.yuktidea.com/api/$id/login"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode({
-        "phone": _phoneNumber.text,
+        "tel_code": widget.code, "phone": _phoneNumber.text
         // Add any other data you want to send in the body
       }),
     );
@@ -76,9 +80,16 @@ class _GetPhoneNumberState extends State<GetPhoneNumber> {
     // }
     // print(await response.stream.bytesToString());
 
-    // print(response.body);
+    print(response.body);
+    response = jsonDecode(response.body);
+    if (response["status"] == false) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(response["message"])));
+      return false;
+    }
     // print((jsonDecode(response)));
     //  print(jsonDecode(response.body));
+    return true;
   }
 
   @override
@@ -118,7 +129,9 @@ class _GetPhoneNumberState extends State<GetPhoneNumber> {
                     borderRadius: BorderRadius.circular(31),
                   ),
                   child: IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                       padding: EdgeInsets.all(0),
                       icon: Icon(
                         Icons.arrow_back_ios,
@@ -227,11 +240,13 @@ class _GetPhoneNumberState extends State<GetPhoneNumber> {
               _phoneNumber.text == ""
                   ? ButtonYu("Get OTP", false, () {})
                   : ButtonYu("Get OTP", true, () async {
-                      await regis();
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        return GetOTP();
-                      }));
+                      if (await regis(context))
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return GetOTP(
+                            phone: widget.code + _phoneNumber.text,
+                          );
+                        }));
                     })
             ],
           ),

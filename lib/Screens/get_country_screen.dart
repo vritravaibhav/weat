@@ -75,7 +75,9 @@ class _GetCountryState extends State<GetCountry> {
                         borderRadius: BorderRadius.circular(31),
                       ),
                       child: IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
                           padding: EdgeInsets.all(0),
                           icon: Icon(
                             Icons.arrow_back_ios,
@@ -171,8 +173,8 @@ class CountryCard extends StatelessWidget {
         Navigator.push(context, MaterialPageRoute(builder: (context) {
           return GetPhoneNumber(
             code: code,
-            country: imageL, user: User,
-            
+            country: imageL,
+            user: User,
           );
         }));
       },
@@ -197,13 +199,21 @@ class CountryCard extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 14.w),
             child: Row(
               children: [
-                SvgPicture.network(
-                  imageL,
-                  placeholderBuilder: (BuildContext context) =>
-                      CircularProgressIndicator(),
-                  height: 20.h, // Adjust height as needed
-                  width: 30.w, // Adjust width as needed
-                ),
+                imageL != null
+                    ? SizedBox(
+                        height: 22.h, // Adjust height as needed
+                        width: 32.w,
+                        child: SvgPicture.network(
+                          imageL.toLowerCase(),
+                          fit: BoxFit.fill,
+                          placeholderBuilder: (BuildContext context) =>
+                              CircularProgressIndicator(),
+                          height: 20.h, // Adjust height as needed
+                          width: 30.w,
+                          // Adjust width as needed
+                        ),
+                      )
+                    : SizedBox(),
                 SizedBox(
                   width: 10.w,
                 ),

@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:yuktidea/Screens/startup_screen.dart';
 import 'package:yuktidea/widget/buttonyu.dart';
+import 'package:yuktidea/widget/constants.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,6 +15,29 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var response;
+  Future<bool> _apiCall() async {
+    response = await http.post(
+      Uri.parse("https://studylancer.yuktidea.com/api/delete"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    print(response.body);
+    response = jsonDecode(response.body);
+    if (response["status"] == false) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(response["message"])));
+
+      return false;
+    }
+    token = "lol";
+
+    security().set();
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,7 +62,13 @@ class _HomePageState extends State<HomePage> {
             SizedBox(
               height: 36.h,
             ),
-            ButtonYu("Delete User", true, () => null)
+            ButtonYu("Delete User", true, () async {
+              if (await _apiCall()) {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return StartupScreen();
+                }));
+              }
+            })
 
             //InkWell(
             //   onTap: (){},

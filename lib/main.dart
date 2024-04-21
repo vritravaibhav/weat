@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:yuktidea/Screens/home_screen.dart';
 import 'package:yuktidea/Screens/startup_screen.dart';
+import 'package:yuktidea/widget/constants.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,13 +20,25 @@ class MyApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) {
         return MaterialApp(
-          title: 'Flutter Demo',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-            useMaterial3: true,
-          ),
-          home:  StartupScreen(),
-        );
+            title: 'Flutter Demo',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              useMaterial3: true,
+            ),
+            home: FutureBuilder(
+                future: security().get(),
+                builder: (context, snap) {
+                  if (snap.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (snap.hasData && token != "lol") {
+                    
+                    return HomePage();
+                  }
+                  return StartupScreen();
+                }));
       },
     );
   }

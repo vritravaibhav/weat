@@ -73,7 +73,9 @@ class _TermsAndConditionState extends State<TermsAndCondition> {
                       borderRadius: BorderRadius.circular(31),
                     ),
                     child: IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                         icon: Icon(
                           Icons.close,
                           color: Colors.white,

@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:yuktidea/Screens/home_screen.dart';
 import 'package:yuktidea/widget/buttonyu.dart';
+
+import 'package:http/http.dart' as http;
+import 'package:yuktidea/widget/constants.dart';
 
 class SelectCountry extends StatefulWidget {
   const SelectCountry({super.key});
@@ -14,6 +19,43 @@ class _SelectCountryState extends State<SelectCountry> {
   bool australia = false;
   bool canada = false;
   bool flag = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  int? id = 1;
+  var response;
+  Future<bool> _apiCall() async {
+    if (australia) {
+      id = 1;
+    } else {
+      id = 2;
+    }
+
+    response = await http.post(
+      Uri.parse("https://studylancer.yuktidea.com/api/select/country"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        "country_id": id
+        // Add any other data you want to send in the body
+      }),
+    );
+    print(response.body);
+    response = jsonDecode(response.body);
+    if (response["status"] == false) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(response["message"])));
+
+      return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,7 +90,9 @@ class _SelectCountryState extends State<SelectCountry> {
                   borderRadius: BorderRadius.circular(31),
                 ),
                 child: IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                     padding: EdgeInsets.all(0),
                     icon: Icon(
                       Icons.arrow_back_ios,
@@ -106,8 +150,8 @@ class _SelectCountryState extends State<SelectCountry> {
                   children: [
                     InkWell(
                       onTap: () {
-                        canada = australia;
-                        australia = !australia;
+                        // canada = australia;
+                        australia = true;
                         flag = true;
                         setState(() {});
                       },
@@ -135,16 +179,15 @@ class _SelectCountryState extends State<SelectCountry> {
                   children: [
                     InkWell(
                       onTap: () {
-                        australia = canada;
-                        canada = !canada;
+                        australia = false;
 
                         flag = true;
                         setState(() {});
                       },
                       child: ColorFiltered(
                           colorFilter: ColorFilter.mode(
-                            !canada ? Colors.grey : Colors.transparent,
-                            !canada ? BlendMode.saturation : BlendMode.color,
+                            australia ? Colors.grey : Colors.transparent,
+                            australia ? BlendMode.saturation : BlendMode.color,
                           ),
                           child: Image.asset("assets/Mask group.png")),
                     ),
@@ -164,8 +207,8 @@ class _SelectCountryState extends State<SelectCountry> {
               ],
             ),
             Expanded(child: SizedBox()),
-            ButtonYu("Proceed", flag, () {
-              if (flag)
+            ButtonYu("Proceed", flag, () async {
+              if (flag && await _apiCall())
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
                   return HomePage();
                 }));
