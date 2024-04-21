@@ -36,6 +36,7 @@ class _GetPhoneNumberState extends State<GetPhoneNumber> {
     super.initState();
   }
 
+  bool isloadingButton = false;
   var response;
   Future<bool> regis(BuildContext context) async {
     // FormData formData = new FormData.fromMap(
@@ -47,6 +48,9 @@ class _GetPhoneNumberState extends State<GetPhoneNumber> {
     //     HttpHeaders.contentTypeHeader: "application/json",
     //   }),
     // );
+    isloadingButton = true;
+    setState(() {});
+
     print(widget.code);
     print(widget.user);
     print(_phoneNumber.text);
@@ -84,11 +88,15 @@ class _GetPhoneNumberState extends State<GetPhoneNumber> {
     response = jsonDecode(response.body);
     if (response["status"] == false) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(response["message"])));
+          .showSnackBar(SnackBar(content: Text(response["data"][0])));
+      isloadingButton = false;
+      setState(() {});
       return false;
     }
     // print((jsonDecode(response)));
     //  print(jsonDecode(response.body));
+    isloadingButton = false;
+    setState(() {});
     return true;
   }
 
@@ -239,15 +247,19 @@ class _GetPhoneNumberState extends State<GetPhoneNumber> {
               ),
               _phoneNumber.text == ""
                   ? ButtonYu("Get OTP", false, () {})
-                  : ButtonYu("Get OTP", true, () async {
-                      if (await regis(context))
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return GetOTP(
-                            phone: widget.code + _phoneNumber.text,
-                          );
-                        }));
-                    })
+                  : !isloadingButton
+                      ? ButtonYu("Get OTP", true, () async {
+                          if (await regis(context))
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return GetOTP(
+                                phone: widget.code + _phoneNumber.text,
+                              );
+                            }));
+                        })
+                      : Center(
+                          child: CircularProgressIndicator(),
+                        )
             ],
           ),
         ));
