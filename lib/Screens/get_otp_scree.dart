@@ -33,7 +33,7 @@ class _GetOTPState extends State<GetOTP> {
   int _start = 30;
   void startTimer() {
     // const oneSec = const Duration(seconds: 10);
-    _timer = new Timer.periodic(
+    _timer = Timer.periodic(
       Duration(seconds: 1),
       (Timer timer) {
         if (_start == 0) {
@@ -80,6 +80,22 @@ class _GetOTPState extends State<GetOTP> {
     token = response["data"]["access_token"];
     security().set();
     return true;
+  }
+
+  Future<void> resendOtp() async {
+    _code.clear();
+    setState(() {});
+
+    await http.post(
+      Uri.parse("https://studylancer.yuktidea.com/api/resend-otp"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode({
+        "phone": widget.phone
+        // Add any other data you want to send in the body
+      }),
+    );
   }
 
   @override
@@ -232,7 +248,9 @@ class _GetOTPState extends State<GetOTP> {
                 ),
                 InkWell(
                     onTap: () {
+                      if (!_resendOTP) resendOtp();
                       _resendOTP = true;
+
                       startTimer();
                       setState(() {});
                     },
